@@ -11,6 +11,7 @@
 #include "system.h"
 #include "shader.inl"
 #include "fp.h"
+#include <stdio.h>
 
 //=================================================================================================================
 
@@ -30,9 +31,18 @@ int intro_init( void )
     #ifdef _DEBUG
         int		result;
         char    info[1536];
-        oglGetProgramiv( vsid, GL_LINK_STATUS, &result ); oglGetProgramInfoLog( vsid, 1024, NULL, (char *)info );  if( !result ) DebugBreak();
-        oglGetProgramiv( fsid, GL_LINK_STATUS, &result ); oglGetProgramInfoLog( fsid, 1024, NULL, (char *)info ); if( !result ) DebugBreak();
-        oglGetProgramiv( pid,  GL_LINK_STATUS, &result ); oglGetProgramInfoLog( pid,  1024, NULL, (char *)info ); if( !result ) DebugBreak();
+        oglGetProgramiv(vsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(vsid, 1024, NULL, (char*)info);  if (!result) {
+            printf("%s\n", info);
+            DebugBreak();
+        }
+        oglGetProgramiv(fsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(fsid, 1024, NULL, (char*)info); if (!result) {
+            printf("%s\n", info);
+            DebugBreak();
+        }
+        oglGetProgramiv( pid,  GL_LINK_STATUS, &result ); oglGetProgramInfoLog( pid,  1024, NULL, (char *)info ); if( !result ) {
+            printf("%s\n", info);
+            DebugBreak();
+        }
     #endif
 
     return 1;
@@ -40,8 +50,7 @@ int intro_init( void )
 
 //=================================================================================================================
 
-
-static unsigned int audioBuffer[4800];
+static unsigned int audioBuffer[4080];
 
 void intro_do( long time, long deltaTime, float* audioData, int count )
 {
@@ -53,18 +62,18 @@ void intro_do( long time, long deltaTime, float* audioData, int count )
 
     float x, y;
 
-    for (int i = 0; i < 4800; i++) {
-        timeI = max(0.f, (t + ((i-1600.f) / 192000.f) * deltaTime / (1000.f / 60.f)));
+    for (int i = 0; i < 4080; i++) {
+        timeI = max(0.f, (t + ((i-8800.f) / 192000.f) * deltaTime / (1000.f / 60.f)));
         if (timeI * 192000 < count) {
             x = audioData[2 * f2i(timeI * 192000)];
             y = audioData[2 * f2i(timeI * 192000) + 1];
-            audioBuffer[i] = f2i(SHRT_MAX * (1 + x)) + (f2i(SHRT_MAX * (1 + y)) << 16);
+            audioBuffer[i] = (int)(f2i(SHRT_MAX * (x))) + ((short)(f2i(SHRT_MAX * (y))) << 16);
         }
         else audioBuffer[i] = 0b10000000000000001000000000000000;
     }
 
     //--- render -----------------------------------------
-    oglProgramUniform1uiv(fsid, 0, 4800, audioBuffer);
+    oglProgramUniform1uiv(fsid, 0, 4080, audioBuffer);
 
     glRects( -1, -1, 1, 1 );
 }

@@ -93,7 +93,7 @@ void entrypoint()
 
     // create window
     //HWND hWnd = CreateWindow( "static",0,WS_POPUP|WS_VISIBLE,0,0,XRES,YRES,0,0,0,0);
-    HWND hWnd = CreateWindow((LPCSTR)0xC018, 0, WS_POPUP | WS_VISIBLE, 0, 0, XRES, YRES, 0, 0, 0, 0);
+    HWND hWnd = CreateWindow((LPCSTR)0xC018, 0, WS_VISIBLE, 0, 0, XRES, YRES, 0, 0, 0, 0);
     if (!hWnd) return;
     hDC = GetDC(hWnd);
     // initalize opengl
@@ -146,14 +146,21 @@ void entrypoint()
     long t;
     long tZero = timeGetTime();
     long lastT = tZero - 10;
+    MSG msg;
     do
     {
+        while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
         t = timeGetTime();
         intro_do(t - tZero, t - lastT, audioData, audioCounterMax);
         lastT = t;
         wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE); //SwapBuffers( hDC );
         if (audioDone) exitCounter++;
-    } while (!GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
+    } while (msg.message != WM_QUIT && !GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
 
     ShowCursor(1);
 
