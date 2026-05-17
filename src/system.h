@@ -34,7 +34,7 @@ extern void *myglfunc[];
 #define oglUseProgramStages             ((PFNGLUSEPROGRAMSTAGESPROC)myglfunc[3])
 #define oglProgramUniform1uiv            ((PFNGLPROGRAMUNIFORM1UIVPROC)myglfunc[4])
 
-#ifdef DEBUG
+#ifdef _DEBUG
 #define oglGetProgramiv          ((PFNGLGETPROGRAMIVPROC)myglfunc[5])
 #define oglGetProgramInfoLog     ((PFNGLGETPROGRAMINFOLOGPROC)myglfunc[6])
 #endif

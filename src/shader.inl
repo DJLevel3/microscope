@@ -15,18 +15,15 @@ static const char *vsh = \
 "void main()"
 "{"
     "gl_Position=vec4(iv,0.0,1.0);"
-    "p=inVer*18000.0;"
+    "p=iv*18000.0;"
 "}";
 
 static const char * fsh = \
 "#version 430\n"
 
-"layout (location=0) uniform uint s[4800];"
+"layout (location=0) uniform uint samp[4800];"
 "layout (location=0) out vec4 co;"
 "in vec2 p;"
-// l = location of gaussian
-// p = position of sample
-// returns gaussian contribution (up to 1)
 
 "float db(in vec2 l, in vec2 p)"
 "{"
@@ -42,13 +39,13 @@ static const char * fsh = \
 "void main()"
 "{"
     "float v=0.0;"
-    "vec2 l1=dc(s[0]),l2,l3;"
+    "vec2 l1=dc(samp[0]),l2,l3;"
     "int div=0;"
     "for (int i=1;i<4800;i++) {"
         "l3=l1;"
-        "l1=dc(s[i]);"
+        "l1=dc(samp[i]);"
         "l2=(l3-l1);"
-        "div=1+int(length(l2)/1024.0);"
+        "div=1+int(length(l2)/4096.0);"
         "l2=l2*(1.0/div);"
         "for (int j=0;j<div;j++)"
         "{"

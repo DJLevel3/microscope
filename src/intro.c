@@ -27,7 +27,7 @@ int intro_init( void )
     oglUseProgramStages(pid, GL_VERTEX_SHADER_BIT, vsid);
     oglUseProgramStages(pid, GL_FRAGMENT_SHADER_BIT, fsid);
 
-    #ifdef DEBUG
+    #ifdef _DEBUG
         int		result;
         char    info[1536];
         oglGetProgramiv( vsid, GL_LINK_STATUS, &result ); oglGetProgramInfoLog( vsid, 1024, NULL, (char *)info );  if( !result ) DebugBreak();
@@ -55,12 +55,11 @@ void intro_do( long time, long deltaTime, float* audioData, int count )
 
     for (int i = 0; i < 4800; i++) {
         timeI = max(0.f, (t + ((i-1600.f) / 192000.f) * deltaTime / (1000.f / 60.f)));
-        if (audioData && (timeI * 192000 < count)) {
+        if (timeI * 192000 < count) {
             x = audioData[2 * f2i(timeI * 192000)];
             y = audioData[2 * f2i(timeI * 192000) + 1];
             audioBuffer[i] = f2i(SHRT_MAX * (1 + x)) + (f2i(SHRT_MAX * (1 + y)) << 16);
         }
-        else if (!audioData) audioBuffer[i] = f2i(SHRT_MAX * (1 + sinf(55 * timeI * 2 * 6.283f))) + (f2i(SHRT_MAX * (1 + cosf(55.05f * timeI * 5 * 6.283f))) << 16);
         else audioBuffer[i] = 0b10000000000000001000000000000000;
     }
 

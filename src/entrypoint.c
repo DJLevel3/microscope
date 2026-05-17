@@ -34,7 +34,13 @@ static char* glFuncNames[] = {
     "glGenProgramPipelines",
     "glBindProgramPipeline",
     "glUseProgramStages",
-    "glProgramUniform1uiv" };
+    "glProgramUniform1uiv",
+#ifdef _DEBUG
+    //--
+    "glGetProgramiv",
+    "glGetProgramInfoLog"
+#endif
+};
 
 
 int  _fltused = 0;
@@ -55,6 +61,8 @@ void CALLBACK WaveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);
 float* audioData = NULL;
 int audioCounter = 0;
 int audioCounterMax = 0;
+bool audioDone = false;
+int exitCounter = 0;
 
 //----------------------------------------------------------------------------
 
@@ -90,10 +98,13 @@ void entrypoint()
     hDC = GetDC(hWnd);
     // initalize opengl
     if (!SetPixelFormat(hDC, ChoosePixelFormat(hDC, &pfd), &pfd)) return;
-    hGLRC = wglCreateContext(hDC);
-    wglMakeCurrent(hDC,hGLRC);
+    wglMakeCurrent(hDC, wglCreateContext(hDC));
 
+#ifdef _DEBUG
+    for (int i = 0; i < 7; i++)
+#else
     for (int i = 0; i < 5; i++)
+#endif
     {
         myglfunc[i] = wglGetProcAddress(glFuncNames[i]);
         if (!myglfunc[i])
@@ -141,8 +152,8 @@ void entrypoint()
         intro_do(t - tZero, t - lastT, audioData, audioCounterMax);
         lastT = t;
         wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE); //SwapBuffers( hDC );
-
-    } while (!GetAsyncKeyState(VK_ESCAPE));
+        if (audioDone) exitCounter++;
+    } while (!GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
 
     ShowCursor(1);
 
@@ -165,6 +176,7 @@ void CALLBACK WaveOutProc(HWAVEOUT wave_out_handle, UINT message, DWORD_PTR inst
                 chunks[chunk_swap][i * 2] = f2i(SHRT_MAX * audioData[audioCounter * 2]);
                 chunks[chunk_swap][i * 2 + 1] = f2i(SHRT_MAX * audioData[audioCounter * 2 + 1]);
                 if (audioCounter + 1 < audioCounterMax) audioCounter++;
+                else audioDone = true;
             }
         }
         if (waveOutWrite(wave_out, &header[chunk_swap], sizeof(header[chunk_swap])) != MMSYSERR_NOERROR) {
