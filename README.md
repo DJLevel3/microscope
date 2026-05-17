@@ -1,4 +1,4 @@
-# Microscope
+# Microscope (WIP preview, not yet released)
 
 ### A truly microscopic software oscilloscope!
 
