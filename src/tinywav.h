@@ -71,7 +71,7 @@ typedef struct TinyWav {
  * @param path     The path of the file to read.
  * @param chanFmt  The desired channel format (how the channel data is layed out in memory) when read.
  *
- * @return  The error code. Zero if no error.
+ * @return  The sample rate, or zero if there was an error.
  */
 int tinywav_open_read(TinyWav *tw, const char *path, TinyWavChannelFormat chanFmt);
 

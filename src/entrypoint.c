@@ -34,7 +34,9 @@ static char* glFuncNames[] = {
     "glGenProgramPipelines",
     "glBindProgramPipeline",
     "glUseProgramStages",
-    "glProgramUniform1uiv",
+    "glProgramUniform1ui",
+    "glActiveTexture",
+    "glGenerateMipmap",
 #ifdef _DEBUG
     //--
     "glGetProgramiv",
@@ -47,7 +49,11 @@ int  _fltused = 0;
 
 HDC hDC;
 HGLRC hGLRC;
-void* myglfunc[5];
+#ifdef _DEBUG
+void* myglfunc[8];
+#else
+void* myglfunc[6];
+#endif
 
 HWAVEOUT wave_out;
 #define CHUNK_SIZE 8192
@@ -56,6 +62,7 @@ short chunks[2][CHUNK_SIZE * 2];
 bool chunk_swap = false;
 long fileCounter;
 bool safe = true;
+bool released = true;
 
 void CALLBACK WaveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);
 float* audioData = NULL;
@@ -64,13 +71,24 @@ int audioCounterMax = 0;
 bool audioDone = false;
 int exitCounter = 0;
 
+float* graticule = NULL;
+float scale = 1;
+
 //----------------------------------------------------------------------------
 
+char filename[256] = ".\\audio.wav";
+char entry[256];
 void entrypoint()
 {
     // For graphics
     TinyWav audio;
-    if (tinywav_open_read(&audio, ".\\audio.wav", TW_INTERLEAVED)) ExitProcess(-2);
+    int rate;
+    printf("microscope\nby DJ_Level_3/BUS ERROR Collective\nPress 1 to toggle between 2x scale (default) and 1x scale.\nHold space to temporarily freeze.\n\nEnter audio file name [default - .\\audio.wav]: ");
+    scanf_s("%255[^\n]s", entry, 256);
+    rate = tinywav_open_read(&audio, entry, TW_INTERLEAVED);
+    if (!rate) rate = tinywav_open_read(&audio, filename, TW_INTERLEAVED);
+    float speed = rate / 192000.f;
+    if (!rate) ExitProcess(-2);
     if (audio.numChannels != 2) {
         tinywav_close_read(&audio);
         ExitProcess(-3);
@@ -101,27 +119,30 @@ void entrypoint()
     wglMakeCurrent(hDC, wglCreateContext(hDC));
 
 #ifdef _DEBUG
-    for (int i = 0; i < 7; i++)
+    for (int i = 0; i < 8; i++)
 #else
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 6; i++)
 #endif
     {
         myglfunc[i] = wglGetProcAddress(glFuncNames[i]);
         if (!myglfunc[i])
-            return;
+            ExitProcess(i);
     }
 
+    graticule = generateGraticule();
+    if (graticule == NULL) ExitProcess(16);
+
     // init intro
-    if (!intro_init()) return;
+    if (!intro_init(graticule)) return;
 
     WAVEFORMATEX format;
     format.wFormatTag = WAVE_FORMAT_PCM,
     format.nChannels = 2;
-    format.nSamplesPerSec = 192000;
+    format.nSamplesPerSec = rate;
     format.wBitsPerSample = 16;
     format.cbSize = 0;
     format.nBlockAlign = 4;
-    format.nAvgBytesPerSec = 768000;
+    format.nAvgBytesPerSec = rate*4;
 
     if (waveOutOpen(&wave_out, -1, &format, (DWORD_PTR)WaveOutProc, (DWORD_PTR)NULL, CALLBACK_FUNCTION) != MMSYSERR_NOERROR) {
         free(audioData);
@@ -129,7 +150,7 @@ void entrypoint()
     }
 
     for (int i = 0; i < 2; ++i) {
-        memset(chunks[i], 0, 2 * CHUNK_SIZE * sizeof(short));
+        memcl(chunks[i], 2 * CHUNK_SIZE * sizeof(short));
         header[i].lpData = (CHAR*)chunks[i];
         header[i].dwBufferLength = CHUNK_SIZE * 2 * 2;
         if (waveOutPrepareHeader(wave_out, &header[i], sizeof(header[i])) != MMSYSERR_NOERROR) {
@@ -154,9 +175,20 @@ void entrypoint()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
-
+        if (GetAsyncKeyState('1')) {
+            if (released) scale = 1 - scale;
+            released = false;
+        }
+        else released = true;
         t = timeGetTime();
-        intro_do(t - tZero, t - lastT, audioData, audioCounterMax);
+        if (GetAsyncKeyState(VK_SPACE)) {
+            safe = false;
+            tZero += t - lastT;
+        }
+        else {
+            safe = true;
+        }
+        intro_do(t - tZero, t - lastT, audioData, audioCounterMax, speed, scale + 1.0f);
         lastT = t;
         wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE); //SwapBuffers( hDC );
         if (audioDone) exitCounter++;
@@ -171,6 +203,7 @@ void entrypoint()
     
     // free up audio or whatever
     free(audioData);
+    free(graticule);
 
     ExitProcess(0);
 }

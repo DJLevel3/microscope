@@ -1,18 +1,18 @@
 #include "system.h"
 
-void* memset(void* dst, int val, size_t size)
+#pragma optimize("", off)
+void memcl(void* dst, size_t size)
 {
     char* realdst = (char*)dst;
     for (size_t i = 0; i < size; i++)
-        realdst[i] = (char)val;
-    return dst;
+        realdst[i] = 0;
 }
 
-void* memcpy(void* dst, const void* src, size_t size)
+void memmv(void* dst, const void* src, size_t size)
 {
     char* _dst = (char*)dst;
     const char* _src = (char*)src;
     for (size_t i = 0; i < size; i++)
         _dst[i] = _src[i];
-    return dst;
 }
+#pragma optimize("", on)

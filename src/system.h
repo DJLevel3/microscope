@@ -7,7 +7,7 @@
 
 #define WIN32_EXTRA_LEAN
 #include <windows.h>
-#include <GL/gl.h>
+#include <GL/GL.h>
 #include "glext.h"
 
 #include <stdlib.h>
@@ -32,11 +32,15 @@ extern void *myglfunc[];
 #define oglGenProgramPipelines          ((PFNGLGENPROGRAMPIPELINESPROC)myglfunc[1])
 #define oglBindProgramPipeline          ((PFNGLBINDPROGRAMPIPELINEPROC)myglfunc[2])
 #define oglUseProgramStages             ((PFNGLUSEPROGRAMSTAGESPROC)myglfunc[3])
-#define oglProgramUniform1uiv            ((PFNGLPROGRAMUNIFORM1UIVPROC)myglfunc[4])
+#define oglProgramUniform1ui            ((PFNGLPROGRAMUNIFORM1UIPROC)myglfunc[4])
+#define oglActiveTexture                ((PFNGLACTIVETEXTUREPROC)myglfunc[5])
 
 #ifdef _DEBUG
-#define oglGetProgramiv          ((PFNGLGETPROGRAMIVPROC)myglfunc[5])
-#define oglGetProgramInfoLog     ((PFNGLGETPROGRAMINFOLOGPROC)myglfunc[6])
+#define oglGetProgramiv          ((PFNGLGETPROGRAMIVPROC)myglfunc[6])
+#define oglGetProgramInfoLog     ((PFNGLGETPROGRAMINFOLOGPROC)myglfunc[7])
 #endif
+
+void memcl(void* mem, size_t ct);
+void memmv(void* dst, const void* src, size_t ct);
 
 #endif

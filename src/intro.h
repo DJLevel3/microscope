@@ -5,11 +5,20 @@
 #ifndef _INTRO_H_
 #define _INTRO_H_
 
-int  intro_init( void );
+#include <windows.h>
+#include <GL/gl.h>
+#include <math.h>
+#include "config.h"
+#include "system.h"
+#include "shader.inl"
+#include "fp.h"
+#include <stdio.h>
+
+int  intro_init( float* graticule );
 
 // will display test pattern if audioData is NULL
-void intro_do( long time, long deltaTime, float* audioData, int count );
+void intro_do( long time, long deltaTime, float* audioData, int count, float speed, float scale );
 
-void intro_end( void );
+float* generateGraticule();
 
 #endif

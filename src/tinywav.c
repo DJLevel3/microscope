@@ -37,17 +37,17 @@ static bool chunkIDMatches(char chunk[4], const char* chunkName)
 
 // MARK: public functions
 
-int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFmt) {
+unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFmt) {
 
     if (tw == NULL || path == NULL) {
-        return -1;
+        return 0;
     }
 
     errno_t err = fopen_s(&tw->f, path, "rb");
     if (err != 0) { tw->f = NULL; }
 
     if (tw->f == NULL) {
-        return -1;
+        return 0;
     }
 
     // Parse WAV header
@@ -62,7 +62,7 @@ int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFm
 
     if (elementCount < 9 || !chunkIDMatches(tw->h.ChunkID, "RIFF") || !chunkIDMatches(tw->h.Format, "WAVE")) {
         tinywav_close_read(tw);
-        return -1;
+        return 0;
     }
 
     // Go through subchunks until we find 'fmt '  (There are sometimes JUNK or other chunks before 'fmt ')
@@ -85,17 +85,17 @@ int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFm
     elementCount += fread(&tw->h.BitsPerSample, sizeof(uint16_t), 1, tw->f);
     if (elementCount != 6) {
         tinywav_close_read(tw);
-        return -1;
+        return 0;
     }
 
     // Sanity checks
     if (tw->h.NumChannels < 1 || tw->h.NumChannels > 128) { // relevant because
         tinywav_close_read(tw);
-        return -1;
+        return 0;
     }
     if (tw->h.SampleRate < 1) {
         tinywav_close_read(tw);
-        return -1;
+        return 0;
     }
 
     // skip over any other chunks before the "data" chunk (e.g. JUNK, INFO, bext, ...)
@@ -121,18 +121,14 @@ int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFm
     else {
         printf("Loaded file uses an incompatible format! Only Microsoft 16-bit signed PCM and 32 bit float are supported. (ffmpeg uses Wave Extended, which is also not supported, but Audacity works correctly)\n");
         tinywav_close_read(tw);
-        return -1;
+        return 0;
     }
 
     // NOTE: previous sanity checks ensure div by zero is not possible here
     tw->numFramesInHeader = tw->h.Subchunk2Size / (tw->numChannels * tw->sampFmt);
     tw->totalFramesReadWritten = 0;
 
-    if (tw->h.SampleRate != 192000) {
-        printf("Loaded file has sample rate of %d, expected 192000. Audio will play back, but at the wrong speed!\n", tw->h.SampleRate);
-    }
-
-    return 0;
+    return tw->h.SampleRate;
 }
 
 int tinywav_read_f(TinyWav* tw, void* data, int len) {
@@ -170,7 +166,7 @@ int tinywav_read_f(TinyWav* tw, void* data, int len) {
         uint32_t frames_read_u32 = (uint32_t)(samples_read / tw->numChannels);
         tw->totalFramesReadWritten += frames_read_u32;
         int frames_read = (int)frames_read_u32;
-        memcpy(data, interleaved_data, tw->numChannels * frames_read * sizeof(float));
+        memmv(data, interleaved_data, tw->numChannels * frames_read * sizeof(float));
         ret = frames_read;
         TW_DEALLOC(interleaved_data);
     }
