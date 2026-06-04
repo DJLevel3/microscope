@@ -83,7 +83,7 @@ void entrypoint()
     // For graphics
     TinyWav audio;
     int rate;
-    printf("microscope\nby DJ_Level_3/BUS ERROR Collective\nPress 1 to toggle between 2x scale (default) and 1x scale.\nHold space to temporarily freeze.\n\nEnter audio file name [default - .\\audio.wav]: ");
+    printf("microscope\nby DJ_Level_3/BUS ERROR Collective^Teletype Corporation\n\nPress 1 to toggle between 2x scale (default) and 1x scale.\n\nEnter audio file name [default - .\\audio.wav]: ");
     scanf_s("%255[^\n]s", entry, 256);
     rate = tinywav_open_read(&audio, entry, TW_INTERLEAVED);
     if (!rate) rate = tinywav_open_read(&audio, filename, TW_INTERLEAVED);
@@ -181,16 +181,10 @@ void entrypoint()
         }
         else released = true;
         t = timeGetTime();
-        if (GetAsyncKeyState(VK_SPACE)) {
-            safe = false;
-            tZero += t - lastT;
-        }
-        else {
-            safe = true;
-        }
+        safe = true;
         intro_do(t - tZero, t - lastT, audioData, audioCounterMax, speed, scale + 1.0f);
         lastT = t;
-        wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE); //SwapBuffers( hDC );
+        wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE);
         if (audioDone) exitCounter++;
     } while (msg.message != WM_QUIT && !GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
 
