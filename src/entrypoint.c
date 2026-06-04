@@ -65,7 +65,7 @@ bool safe = true;
 bool released = true;
 
 void CALLBACK WaveOutProc(HWAVEOUT, UINT, DWORD_PTR, DWORD_PTR, DWORD_PTR);
-float* audioData = NULL;
+short* audioData = NULL;
 int audioCounter = 0;
 int audioCounterMax = 0;
 bool audioDone = false;
@@ -94,7 +94,7 @@ void entrypoint()
         ExitProcess(-3);
     }
     int nSamples = audio.numFramesInHeader;
-    audioData = (float*)malloc(nSamples * 2 * sizeof(float));
+    audioData = (short*)malloc(nSamples * 2 * sizeof(short));
     if (audioData == NULL) ExitProcess(-5);
     if (tinywav_read_f(&audio, audioData, nSamples) != nSamples) {
         tinywav_close_read(&audio);
@@ -207,8 +207,8 @@ void CALLBACK WaveOutProc(HWAVEOUT wave_out_handle, UINT message, DWORD_PTR inst
         if (safe) {
             for (int i = 0; i < CHUNK_SIZE; ++i) {
                 // write the audio here
-                chunks[chunk_swap][i * 2] = f2i(SHRT_MAX * audioData[audioCounter * 2]);
-                chunks[chunk_swap][i * 2 + 1] = f2i(SHRT_MAX * audioData[audioCounter * 2 + 1]);
+                chunks[chunk_swap][i * 2] = audioData[audioCounter * 2];
+                chunks[chunk_swap][i * 2 + 1] = audioData[audioCounter * 2 + 1];
                 if (audioCounter + 1 < audioCounterMax) audioCounter++;
                 else audioDone = true;
             }

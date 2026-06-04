@@ -64,8 +64,8 @@ void intro_do( long time, long deltaTime, float* audioData, int count, float spe
     for (int i = 0; i < 4800; i++) {
         timeI = f2i(max(0.f, (t + (i-1600) * dt)));
         if (timeI < count) {
-            audioBuffer[i * 2] = 0.5f * scale * audioData[2 * timeI];
-            audioBuffer[i * 2 + 1] = 0.5f * scale * audioData[2 * timeI + 1];
+            audioBuffer[i * 2] = 0.5f * scale * audioData[2 * timeI] / 32768;
+            audioBuffer[i * 2 + 1] = 0.5f * scale * audioData[2 * timeI + 1] / 32768;
         }
         else {
             break;

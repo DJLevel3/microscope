@@ -112,20 +112,14 @@ unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelForm
     tw->numChannels = tw->h.NumChannels;
     tw->chanFmt = chanFmt;
 
-    if (tw->h.BitsPerSample == 32 && tw->h.AudioFormat == 3) {
-        tw->sampFmt = TW_FLOAT32; // file has 32-bit IEEE float samples
-    }
-    else if (tw->h.BitsPerSample == 16 && tw->h.AudioFormat == 1) {
-        tw->sampFmt = TW_INT16; // file has 16-bit int samples
-    }
-    else {
-        printf("Loaded file uses an incompatible format! Only Microsoft 16-bit signed PCM and 32 bit float are supported. (ffmpeg uses Wave Extended, which is also not supported, but Audacity works correctly)\n");
+    if (tw->h.BitsPerSample != 16 || tw->h.AudioFormat != 1) {
+        printf("Loaded file uses an incompatible format! Only Microsoft 16-bit signed PCM is supported. (ffmpeg uses Wave Extended, which is also not supported, but Audacity works correctly)\n");
         tinywav_close_read(tw);
         return 0;
     }
 
     // NOTE: previous sanity checks ensure div by zero is not possible here
-    tw->numFramesInHeader = tw->h.Subchunk2Size / (tw->numChannels * tw->sampFmt);
+    tw->numFramesInHeader = tw->h.Subchunk2Size / (tw->numChannels * 2);
     tw->totalFramesReadWritten = 0;
 
     return tw->h.SampleRate;
@@ -133,10 +127,7 @@ unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelForm
 
 int tinywav_read_f(TinyWav* tw, void* data, int len) {
 
-    if (tw == NULL || data == NULL || len < 0) {
-        return -1;
-    }
-    if (len > tw->numFramesInHeader) {
+    if (tw == NULL || data == NULL || len < 0 || len > tw->numFramesInHeader) {
         return -1;
     }
 
@@ -148,28 +139,17 @@ int tinywav_read_f(TinyWav* tw, void* data, int len) {
 
     int ret = 0;
 
-    if (tw->sampFmt == TW_INT16) {
-        TW_ALLOC(int16_t, interleaved_data, tw->numChannels * len);
-        size_t samples_read = fread(interleaved_data, sizeof(int16_t), tw->numChannels * len, tw->f);
-        uint32_t frames_read_u32 = (uint32_t)(samples_read / tw->numChannels);
-        tw->totalFramesReadWritten += frames_read_u32;
-        int frames_read = (int)frames_read_u32;
-        for (int pos = 0; pos < tw->numChannels * frames_read; pos++) {
-            ((float*)data)[pos] = (float)interleaved_data[pos] / INT16_MAX;
-        }
-        ret = frames_read;
-        TW_DEALLOC(interleaved_data);
+    TW_ALLOC(int16_t, interleaved_data, tw->numChannels * len);
+    if (!interleaved_data) return -1;
+    size_t samples_read = fread(interleaved_data, sizeof(int16_t), tw->numChannels * len, tw->f);
+    uint32_t frames_read_u32 = (uint32_t)(samples_read / tw->numChannels);
+    tw->totalFramesReadWritten += frames_read_u32;
+    int frames_read = (int)frames_read_u32;
+    for (int pos = 0; pos < tw->numChannels * frames_read; pos++) {
+        ((short*)data)[pos] = interleaved_data[pos];
     }
-    else {
-        TW_ALLOC(float, interleaved_data, tw->numChannels * len);
-        size_t samples_read = fread(interleaved_data, sizeof(float), tw->numChannels * len, tw->f);
-        uint32_t frames_read_u32 = (uint32_t)(samples_read / tw->numChannels);
-        tw->totalFramesReadWritten += frames_read_u32;
-        int frames_read = (int)frames_read_u32;
-        memmv(data, interleaved_data, tw->numChannels * frames_read * sizeof(float));
-        ret = frames_read;
-        TW_DEALLOC(interleaved_data);
-    }
+    ret = frames_read;
+    TW_DEALLOC(interleaved_data);
 
     return ret;
 }

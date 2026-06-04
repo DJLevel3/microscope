@@ -16,7 +16,6 @@
 
 int  intro_init( float* graticule );
 
-// will display test pattern if audioData is NULL
 void intro_do( long time, long deltaTime, float* audioData, int count, float speed, float scale );
 
 float* generateGraticule();

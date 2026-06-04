@@ -41,6 +41,5 @@ extern void *myglfunc[];
 #endif
 
 void memcl(void* mem, size_t ct);
-void memmv(void* dst, const void* src, size_t ct);
 
 #endif
