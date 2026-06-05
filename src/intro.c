@@ -55,7 +55,7 @@ int intro_init( float* graticule )
 
 static float audioBuffer[2*4800];
 
-void intro_do( long time, long deltaTime, float* audioData, int count, float speed, float scale )
+void intro_do( long time, long deltaTime, short* audioData, int count, float speed, float scale )
 {
     //--- update parameters -----------------------------------------
     float t = (speed * time * 192), dt = speed * deltaTime * 0.06f;

@@ -15,20 +15,6 @@ static const PIXELFORMATDESCRIPTOR pfd = {
     sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
     32, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 32, 0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 
-const static DEVMODE screenSettings = { {0},
-    #if _MSC_VER < 1400
-    0,0,148,0,0x001c0000,{0},0,0,0,0,0,0,0,0,0,{0},0,32,XRES,YRES,0,0,      // Visual C++ 6.0
-    #else
-    0,0,156,0,0x001c0000,{0},0,0,0,0,0,{0},0,32,XRES,YRES,{0}, 0,           // Visual Studio 2005
-    #endif
-    #if(WINVER >= 0x0400)
-    0,0,0,0,0,0,
-    #if (WINVER >= 0x0500) || (_WIN32_WINNT >= 0x0400)
-    0,0
-    #endif
-    #endif
-};
-
 const static char* glFuncNames[] = {
     "glCreateShaderProgramv",
     "glGenProgramPipelines",
@@ -107,7 +93,7 @@ void entrypoint()
 
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 
-    //ShowCursor(0);
+    ShowCursor(0);
 
     // create window
     //HWND hWnd = CreateWindow( "static",0,WS_POPUP|WS_VISIBLE,0,0,XRES,YRES,0,0,0,0);
@@ -191,7 +177,7 @@ void entrypoint()
         if (audioDone) exitCounter++;
     } while (msg.message != WM_QUIT && !GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
 
-    //ShowCursor(1);
+    ShowCursor(1);
 
     waveOutUnprepareHeader(wave_out, &header[0], sizeof(header[0]));
     waveOutUnprepareHeader(wave_out, &header[1], sizeof(header[1]));
