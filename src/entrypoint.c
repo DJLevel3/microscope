@@ -15,7 +15,7 @@ static const PIXELFORMATDESCRIPTOR pfd = {
     sizeof(PIXELFORMATDESCRIPTOR), 1, PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER, PFD_TYPE_RGBA,
     32, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 32, 0, 0, PFD_MAIN_PLANE, 0, 0, 0, 0 };
 
-static DEVMODE screenSettings = { {0},
+const static DEVMODE screenSettings = { {0},
     #if _MSC_VER < 1400
     0,0,148,0,0x001c0000,{0},0,0,0,0,0,0,0,0,0,{0},0,32,XRES,YRES,0,0,      // Visual C++ 6.0
     #else
@@ -29,7 +29,7 @@ static DEVMODE screenSettings = { {0},
     #endif
 };
 
-static char* glFuncNames[] = {
+const static char* glFuncNames[] = {
     "glCreateShaderProgramv",
     "glGenProgramPipelines",
     "glBindProgramPipeline",
@@ -85,29 +85,29 @@ void entrypoint()
     int rate;
     printf("microscope\nby DJ_Level_3/BUS ERROR Collective^Teletype Corporation\n\nPress 1 to toggle between 2x scale (default) and 1x scale.\n\nEnter audio file name [default - .\\audio.wav]: ");
     scanf_s("%255[^\n]s", entry, 256);
-    rate = tinywav_open_read(&audio, entry, TW_INTERLEAVED);
-    if (!rate) rate = tinywav_open_read(&audio, filename, TW_INTERLEAVED);
+    rate = tinywav_open_read(&audio, entry);
+    if (!rate) rate = tinywav_open_read(&audio, filename);
     float speed = rate / 192000.f;
     if (!rate) ExitProcess(-2);
     if (audio.numChannels != 2) {
-        tinywav_close_read(&audio);
+        fclose(audio.f);
         ExitProcess(-3);
     }
     int nSamples = audio.numFramesInHeader;
     audioData = (short*)malloc(nSamples * 2 * sizeof(short));
     if (audioData == NULL) ExitProcess(-5);
     if (tinywav_read_f(&audio, audioData, nSamples) != nSamples) {
-        tinywav_close_read(&audio);
+        fclose(audio.f);
         free(audioData);
         ExitProcess(-4);
     }
-    tinywav_close_read(&audio);
+    fclose(audio.f);
 
     audioCounterMax = nSamples;
 
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
 
-    ShowCursor(0);
+    //ShowCursor(0);
 
     // create window
     //HWND hWnd = CreateWindow( "static",0,WS_POPUP|WS_VISIBLE,0,0,XRES,YRES,0,0,0,0);
@@ -191,7 +191,7 @@ void entrypoint()
         if (audioDone) exitCounter++;
     } while (msg.message != WM_QUIT && !GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
 
-    ShowCursor(1);
+    //ShowCursor(1);
 
     waveOutUnprepareHeader(wave_out, &header[0], sizeof(header[0]));
     waveOutUnprepareHeader(wave_out, &header[1], sizeof(header[1]));

@@ -43,17 +43,6 @@ typedef struct TinyWavHeader {
   char Subchunk2ID[4];
   uint32_t Subchunk2Size;
 } TinyWavHeader;
-  
-typedef enum TinyWavChannelFormat {
-  TW_INTERLEAVED, // channel buffer is interleaved e.g. [LRLRLRLR]
-  TW_INLINE,      // channel buffer is inlined e.g. [LLLLRRRR]
-  TW_SPLIT        // channel buffer is split e.g. [[LLLL],[RRRR]]
-} TinyWavChannelFormat;
-
-typedef enum TinyWavSampleFormat {
-  TW_INT16 = 2,  // two byte signed integer
-  TW_FLOAT32 = 4 // four byte IEEE float
-} TinyWavSampleFormat;
 
 typedef struct TinyWav {
   FILE *f;
@@ -61,8 +50,6 @@ typedef struct TinyWav {
   int16_t numChannels;
   int32_t numFramesInHeader; ///< number of samples per channel declared in wav header (only populated when reading)
   uint32_t totalFramesReadWritten; ///< total numSamples per channel which have been read or written
-  TinyWavChannelFormat chanFmt;
-  TinyWavSampleFormat sampFmt;
 } TinyWav;
 
 /**
@@ -73,7 +60,7 @@ typedef struct TinyWav {
  *
  * @return  The sample rate, or zero if there was an error.
  */
-int tinywav_open_read(TinyWav *tw, const char *path, TinyWavChannelFormat chanFmt);
+int tinywav_open_read(TinyWav *tw, const char *path);
 
 /**
  * Read sample data from the file.
@@ -86,9 +73,6 @@ int tinywav_open_read(TinyWav *tw, const char *path, TinyWavChannelFormat chanFm
  * @return The number of frames (samples per channel) read from file.
  */
 int tinywav_read_f(TinyWav *tw, void *data, int len);
-
-/** Stop reading the file. The Tinywav struct is now invalid. */
-void tinywav_close_read(TinyWav *tw);
   
 
 #endif // _TINY_WAV_

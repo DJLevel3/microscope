@@ -18,10 +18,6 @@
 
 #include <malloc.h>
 
-#define TW_ALLOC(type, var, sz) type* var = (type*) malloc((sz)*sizeof(type))
-
-#define TW_DEALLOC(x) free(x)
-
  // MARK: private functions
 
  /** @returns true if the chunk of 4 characters matches the supplied string */
@@ -37,18 +33,12 @@ static bool chunkIDMatches(char chunk[4], const char* chunkName)
 
 // MARK: public functions
 
-unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelFormat chanFmt) {
+unsigned int tinywav_open_read(TinyWav* tw, const char* path) {
 
-    if (tw == NULL || path == NULL) {
-        return 0;
-    }
+    if (tw == NULL || path == NULL) return 0;
 
     errno_t err = fopen_s(&tw->f, path, "rb");
-    if (err != 0) { tw->f = NULL; }
-
-    if (tw->f == NULL) {
-        return 0;
-    }
+    if (err != 0) return 0;
 
     // Parse WAV header
     /** @note: We do this byte-by-byte to avoid dependencies (htonl() et al.) and because struct padding depends on
@@ -60,10 +50,7 @@ unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelForm
     elementCount += fread(&tw->h.ChunkSize, sizeof(uint32_t), 1, tw->f);
     elementCount += fread(tw->h.Format, sizeof(char), 4, tw->f);
 
-    if (elementCount < 9 || !chunkIDMatches(tw->h.ChunkID, "RIFF") || !chunkIDMatches(tw->h.Format, "WAVE")) {
-        tinywav_close_read(tw);
-        return 0;
-    }
+    if (elementCount < 9 || !chunkIDMatches(tw->h.ChunkID, "RIFF") || !chunkIDMatches(tw->h.Format, "WAVE")) goto FUCKEDUP;
 
     // Go through subchunks until we find 'fmt '  (There are sometimes JUNK or other chunks before 'fmt ')
     while (fread(tw->h.Subchunk1ID, sizeof(char), 4, tw->f) == 4) {
@@ -83,20 +70,8 @@ unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelForm
     elementCount += fread(&tw->h.ByteRate, sizeof(uint32_t), 1, tw->f);
     elementCount += fread(&tw->h.BlockAlign, sizeof(uint16_t), 1, tw->f);
     elementCount += fread(&tw->h.BitsPerSample, sizeof(uint16_t), 1, tw->f);
-    if (elementCount != 6) {
-        tinywav_close_read(tw);
-        return 0;
-    }
 
-    // Sanity checks
-    if (tw->h.NumChannels < 1 || tw->h.NumChannels > 128) { // relevant because
-        tinywav_close_read(tw);
-        return 0;
-    }
-    if (tw->h.SampleRate < 1) {
-        tinywav_close_read(tw);
-        return 0;
-    }
+    if (elementCount != 6 || tw->h.NumChannels < 1 || tw->h.NumChannels > 128 || tw->h.SampleRate < 1) goto FUCKEDUP;
 
     // skip over any other chunks before the "data" chunk (e.g. JUNK, INFO, bext, ...)
     while (fread(tw->h.Subchunk2ID, sizeof(char), 4, tw->f) == 4) {
@@ -105,16 +80,16 @@ unsigned int tinywav_open_read(TinyWav* tw, const char* path, TinyWavChannelForm
             break;
         }
         else {
-            fseek(tw->f, tw->h.Subchunk2Size, SEEK_CUR); // skip this subchunk
+            fseek(tw->f, tw->h.Subchunk2Size, SEEK_CUR);
         }
     }
 
     tw->numChannels = tw->h.NumChannels;
-    tw->chanFmt = chanFmt;
 
     if (tw->h.BitsPerSample != 16 || tw->h.AudioFormat != 1) {
-        printf("Loaded file uses an incompatible format! Only Microsoft 16-bit signed PCM is supported. (ffmpeg uses Wave Extended, which is also not supported, but Audacity works correctly)\n");
-        tinywav_close_read(tw);
+        printf("Incompatible file! S16LE WAV only. (ffmpeg uses WaveEX, use Audacity)\n");
+FUCKEDUP:
+        fclose(tw->f);
         return 0;
     }
 
@@ -131,15 +106,11 @@ int tinywav_read_f(TinyWav* tw, void* data, int len) {
         return -1;
     }
 
-    if (tw->totalFramesReadWritten * tw->h.BlockAlign >= tw->h.Subchunk2Size) {
-        // We are past the 'data' subchunk (size as declared in header).
-        // Sometimes there are additionl chunks *after* -- ignore these.
-        return 0; // there's nothing more to read, not an error.
-    }
+    if (tw->totalFramesReadWritten * tw->h.BlockAlign >= tw->h.Subchunk2Size) return 0; // there's nothing more to read, not an error.
 
     int ret = 0;
 
-    TW_ALLOC(int16_t, interleaved_data, tw->numChannels * len);
+    short* interleaved_data = (short*)malloc(sizeof(short) * tw->numChannels * len);
     if (!interleaved_data) return -1;
     size_t samples_read = fread(interleaved_data, sizeof(int16_t), tw->numChannels * len, tw->f);
     uint32_t frames_read_u32 = (uint32_t)(samples_read / tw->numChannels);
@@ -148,17 +119,7 @@ int tinywav_read_f(TinyWav* tw, void* data, int len) {
     for (int pos = 0; pos < tw->numChannels * frames_read; pos++) {
         ((short*)data)[pos] = interleaved_data[pos];
     }
-    ret = frames_read;
-    TW_DEALLOC(interleaved_data);
+    free(interleaved_data);
 
-    return ret;
-}
-
-void tinywav_close_read(TinyWav* tw) {
-    if (tw->f == NULL) {
-        return; // fclose(NULL) is undefined behaviour
-    }
-
-    fclose(tw->f);
-    tw->f = NULL;
+    return frames_read;
 }
