@@ -4,6 +4,10 @@
 
 #ifndef _SYSTEM_H_
 #define _SYSTEM_H_
+#include "config.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #define WIN32_EXTRA_LEAN
 #include <windows.h>
@@ -22,7 +26,7 @@ static inline int f2i(float x) // use this to convert float to int, or use /QIfi
 {
     int tmp;
     _asm fld dword ptr[x]
-    _asm fistp dword ptr[tmp];
+        _asm fistp dword ptr[tmp];
     return tmp;
 }
 
@@ -40,6 +44,32 @@ extern void *myglfunc[];
 #define oglGetProgramInfoLog     ((PFNGLGETPROGRAMINFOLOGPROC)myglfunc[7])
 #endif
 
-void memcl(void* mem, size_t ct);
+#ifdef STANDALONE
+void memcl(void* mem, int val, size_t ct);
+#else
 
+static inline short demo_rand(int* seed)
+{
+    seed[0] = seed[0] * 0x343FD + 0x269EC3;
+    return seed[0] >> 6;
+}
+
+void* memcl(void* dst, int val, size_t size);
+void* memmv(void* dst, const void* src, size_t size);
+
+void mvp43(float* matrix, float* src, float* dest);
+
+static float view_matrix[16] = {
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, -5,
+    0, 0, 0, 1
+};
+static float proj_matrix[16] = {
+    1.0f, 0,     0,      0,
+    0,    1.0f,  0,      0,
+    0,    0,    -1.0f, -1.0f,
+    0,    0,    -p0d40,  0.0f
+};
+#endif
 #endif

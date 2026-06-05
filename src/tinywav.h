@@ -21,9 +21,6 @@
 
 #define TINYWAV_USE_MALLOC 1
 
-#include <stdint.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include "system.h"
 
 // http://soundfile.sapp.org/doc/WaveFormat/
@@ -60,7 +57,7 @@ typedef struct TinyWav {
  *
  * @return  The sample rate, or zero if there was an error.
  */
-int tinywav_open_read(TinyWav *tw, const char *path);
+unsigned int tinywav_open_read(TinyWav *tw, const char *path);
 
 /**
  * Read sample data from the file.

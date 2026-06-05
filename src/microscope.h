@@ -14,9 +14,11 @@
 #include "fp.h"
 #include <stdio.h>
 
-int  intro_init( float* graticule );
+int  microscope_init( );
 
-void intro_do( long time, long deltaTime, float* audioData, int count, float speed, float scale );
+int microscope_grat(float* graticule);
+
+void microscope_do( long time, short* audioData, int count, float speed, float scale );
 
 float* generateGraticule();
 

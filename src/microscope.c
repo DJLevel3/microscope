@@ -4,14 +4,14 @@
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
-#include "intro.h"
+#include "microscope.h"
 
 //=================================================================================================================
 
 static int   fsid;
 static int   stex[2];
 
-int intro_init( float* graticule )
+int microscope_init( )
 {
     int vsid = oglCreateShaderProgramv( GL_VERTEX_SHADER,   1, &vsh );
     fsid = oglCreateShaderProgramv( GL_FRAGMENT_SHADER, 1, &fsh );
@@ -42,7 +42,6 @@ int intro_init( float* graticule )
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 300, 300, 0, GL_RGB, GL_FLOAT, graticule);
 
     oglActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_1D, stex[0]);
@@ -51,18 +50,24 @@ int intro_init( float* graticule )
     return 1;
 }
 
+int microscope_grat(float* graticule) {
+    oglActiveTexture(GL_TEXTURE0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 300, 300, 0, GL_RGB, GL_FLOAT, graticule);
+    oglActiveTexture(GL_TEXTURE1);
+}
+
 //=================================================================================================================
 
-static float audioBuffer[2*4800];
+static float audioBuffer[2*9600];
 
-void intro_do( long time, long deltaTime, short* audioData, int count, float speed, float scale )
+void microscope_do( long time, short* audioData, int count, float speed, float scale )
 {
     //--- update parameters -----------------------------------------
-    float t = (speed * time * 192), dt = speed * deltaTime * 0.06f;
+    float t = (speed * time * 192), dt = speed;
     int timeI;
-    memcl(audioBuffer, 2 * 4800 * sizeof(float));
-    for (int i = 0; i < 4800; i++) {
-        timeI = f2i(max(0.f, (t + (i-1600) * dt)));
+    memcl(audioBuffer, 0, 2 * 9600 * sizeof(float));
+    for (int i = 0; i < 9600; i++) {
+        timeI = f2i(max(0.f, (t + (i-3200) * dt)));
         if (timeI < count) {
             audioBuffer[i * 2] = 0.5f * scale * audioData[2 * timeI] / 32768;
             audioBuffer[i * 2 + 1] = 0.5f * scale * audioData[2 * timeI + 1] / 32768;
@@ -73,20 +78,19 @@ void intro_do( long time, long deltaTime, short* audioData, int count, float spe
     }
 
     //--- render -----------------------------------------
-    //oglProgramUniform1uiv(fsid, 0, 4080, audioBuffer);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, 4800, 0, GL_RG, GL_FLOAT, audioBuffer);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, 9600, 0, GL_RG, GL_FLOAT, audioBuffer);
 
     glRects( -1, -1, 1, 1 );
 }
 
 // make sure to free the returned array!
-float* generateGraticule() {
+float* generateGraticule(bool on) {
     float* g = (float*)malloc(3 * 300 * 300 * sizeof(float));
-    memcl(g, 3 * 300 * 300 * sizeof(float));
+    memcl(g, 0, 3 * 300 * 300 * sizeof(float));
     if (g == NULL) return NULL;
     for (int x = 1; x < 301; x++) {
         for (int y = 1; y < 301; y++) {
-            if (!(x % 60 < 2
+            if (!on || !(x % 60 < 2
                 || y % 60 < 2
                 || (x < 6 && y % 12 < 2)
                 || (y < 6 && x % 12 < 2)
