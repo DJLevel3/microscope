@@ -175,15 +175,18 @@ void entrypoint()
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
         if (GetAsyncKeyState('1')) {
             if (released) scale = 1 - scale;
             released = false;
         }
         else released = true;
+
         t = timeGetTime();
-        safe = true;
         intro_do(t - tZero, t - lastT, audioData, audioCounterMax, speed, scale + 1.0f);
         lastT = t;
+
+        safe = true;
         wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE);
         if (audioDone) exitCounter++;
     } while (msg.message != WM_QUIT && !GetAsyncKeyState(VK_ESCAPE) && exitCounter < 10);
@@ -191,7 +194,7 @@ void entrypoint()
     ShowCursor(1);
 
     waveOutUnprepareHeader(wave_out, &header[0], sizeof(header[0]));
-    waveOutUnprepareHeader(wave_out, &header[0], sizeof(header[1]));
+    waveOutUnprepareHeader(wave_out, &header[1], sizeof(header[1]));
 
     safe = false;
     
