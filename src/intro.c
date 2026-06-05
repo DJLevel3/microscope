@@ -23,17 +23,17 @@ int intro_init( float* graticule )
     oglUseProgramStages(pid, GL_FRAGMENT_SHADER_BIT, fsid);
 
     #ifdef _DEBUG
-        int		result;
-        char    info[1536];
-        oglGetProgramiv(vsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(vsid, 1024, NULL, (char*)info);  if (!result) {
-            printf("Vertex shader compilation error log:\n%s\n\n", info);
-        }
-        oglGetProgramiv(fsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(fsid, 1024, NULL, (char*)info); if (!result) {
-            printf("Fragment shader compilation error log:\n%s\n\n", info);
-        }
-        oglGetProgramiv( pid,  GL_LINK_STATUS, &result ); oglGetProgramInfoLog( pid,  1024, NULL, (char *)info ); if( !result ) {
-            printf("Shader creation error log : \n % s\n\n", info);
-        }
+    int		result;
+    char    info[1536];
+    oglGetProgramiv(vsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(vsid, 1024, NULL, (char*)info);  if (!result) {
+        printf("Vertex shader compilation error log:\n%s\n\n", info);
+    }
+    oglGetProgramiv(fsid, GL_LINK_STATUS, &result); oglGetProgramInfoLog(fsid, 1024, NULL, (char*)info); if (!result) {
+        printf("Fragment shader compilation error log:\n%s\n\n", info);
+    }
+    oglGetProgramiv( pid,  GL_LINK_STATUS, &result ); oglGetProgramInfoLog( pid,  1024, NULL, (char *)info ); if( !result ) {
+        printf("Shader creation error log : \n % s\n\n", info);
+    }
     #endif
 
     glGenTextures(2, stex);
