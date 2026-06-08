@@ -1,0 +1,75 @@
+            _
+  _ __ ___ (_) ___ _ __ ___  ___  ___ ___  _ __   ___
+ | '_ ` _ \| |/ __| '__/ _ \/ __|/ __/ _ \| '_ \ / _ \
+ | | | | | | | (__| | | (_) \__ \ (_| (_) | |_) |  __/
+ |_| |_| |_|_|\___|_|  \___/|___/\___\___/| .__/ \___|
+  NOVA 2026      by DJ_Level_3/BEC^TTC    |_|   v1.0.0
+				 
+     A downright microscopic software oscilloscope!
+
+   Time to celebrate - it's finally possible to enter
+ executable oscilloscope music prods into parties
+ without wild compos, as the oscilloscope can now be
+ self-contained within the prod! It may bring even top
+ class GPUs to their knees at native resolution, but
+ microscope is a super high-quality oscilloscope, and
+ it's only 4 kilobytes! Or as low as 2 kilobytes if
+ it's integrated.
+ 
+   While microscope itself is very much restricted to
+ Windows only, the core shader is dead simple and can
+ easily be run on any system with OpenGL. Just supply
+ a graticule mask texture and 9600 audio samples (led
+ by configuration data) and let the GPU deal with the
+ rest. And because it's open source, improvements and
+ ports are easily possible, and highly encouraged!
+ 
+        ==========    Bundle Info    ==========
+ 
+   This bundle includes two executables, as well as a
+ ZIP of the source code (as of v1.0.0).
+ 
+ "microscope-standalone-3631.exe" is the standalone
+     oscilloscope build, which loads a .wav file from
+	 disk and plays it live.
+	 
+ "ready+microscope-15905.exe" is our demo that won
+     the Wild compo at Revision 2026 ("Ready?") with
+	 microscope integrated.
+ 
+ "microscope-source.zip" is the source code. The exes
+     above were linked from said code using Crinkler
+	 v3.0a, which you'll need to source yourself.
+ 
+   To check for updates, view development history, or
+ submit issues and pull requests, check out the GitHub
+ repository:
+   https://github.com/DJLevel3/microscope
+
+=======================================================
+=                                                     =
+=      BUS ERROR Collective/Teletype Corporation      =
+=                                                     =
+====================    Members    ====================
+=                                                     =
+=                     BUS ERROR                       =
+=                     Cosine Tony                     =
+=                     DJ_Level_3  (Hey - that's me!)  =
+=                     Fazeshift                       =
+=                     Marv1994                        =
+=                     mickaleus                       =
+=                     spacedog                        =
+=                     Tachy Bunker                    =
+=                                                     =
+=======================================================
+
+p.s. If you want a software oscilloscope that doesn't
+     perform terribly, and a synthesizer for making
+	 oscilloscope music, you should check out Sosci
+	 and osci-render by James H. Ball. They're also
+	 open source, but they're much more cross-platform
+	 and high performance. James charges for compiled
+	 binaries, and I advocate for paying, because he
+	 has put his heart and soul into those projects.
+
+p.p.s. AMIGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
