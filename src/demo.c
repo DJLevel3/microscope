@@ -1384,8 +1384,8 @@ static const char* greetsText[] = {
     " PRESENTS MICROSCOPE", // 52
     " PRESENTS MICROSCOPE", // 54
     "A SOFTWARE  OSCOPE  ", // 56
-    "  IN 3KB  STANDALONE", // 58
-    "  OR NET    2KB ON  ", // 60
+    "  IN 4KB  STANDALONE", // 58
+    "  OR NET    3KB ON  ", // 60
     " THE 13KB   READY?  ", // 62
     " NO EXTRA  HARDWARE ", // 64
     " NO EXTRA  SOFTWARE ", // 66

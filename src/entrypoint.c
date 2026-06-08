@@ -168,8 +168,8 @@ void entrypoint()
  *     | '_ ` _ \| |/ __| '__/ _ \/ __|/ __/ _ \| '_ \ / _ \
  *     | | | | | | | (__| | | (_) \__ \ (_| (_) | |_) |  __/
  *     |_| |_| |_|_|\___|_|  \___/|___/\___\___/| .__/ \___|
- *      + Ready?       by DJ_Level_3/BEC^TTC    |_|   v1.0.0
- *      Standalone     by DJ_Level_3/BEC^TTC    |_|   v1.0.0
+ *                     by DJ_Level_3/BEC^TTC    |_|   v1.0.0
+ *                     by DJ_Level_3/BEC^TTC    |_|   v1.0.0
  */
 #ifdef STANDALONE
     TinyWav audio;
