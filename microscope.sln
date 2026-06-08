@@ -10,6 +10,7 @@ Global
 		Debug|x86 = Debug|x86
 		ReadyDebug|x86 = ReadyDebug|x86
 		ReadyRelease|x86 = ReadyRelease|x86
+		ReadyUncompressed|x86 = ReadyUncompressed|x86
 		Release|x86 = Release|x86
 		ReleaseUncompressed|x86 = ReleaseUncompressed|x86
 	EndGlobalSection
@@ -20,6 +21,8 @@ Global
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyDebug|x86.Build.0 = ReadyDebug|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyRelease|x86.ActiveCfg = ReadyRelease|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyRelease|x86.Build.0 = ReadyRelease|Win32
+		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyUncompressed|x86.ActiveCfg = ReadyUncompressed|Win32
+		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyUncompressed|x86.Build.0 = ReadyUncompressed|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.Release|x86.ActiveCfg = Release|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.Release|x86.Build.0 = Release|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReleaseUncompressed|x86.ActiveCfg = ReleaseUncompressed|Win32

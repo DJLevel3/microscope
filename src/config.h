@@ -5,16 +5,16 @@
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
-#define XRES        540
-#define YRES        540
+#define XRES        1080
+#define YRES        1080
 
 #ifndef STANDALONE
 #define FILE_RATE 192000 // Actual sample rate. Changing this changes stuff a lot, including how the drums sound
 #define BPM 120.f // BPM. I think you should understand this
 
 // Don't touch these, they adjust the pitches and sample rates to match the BPM
-#define SPEED_FACTOR (120.f / BPM)
-#define SAMPLE_RATE ((int)(SPEED_FACTOR * FILE_RATE))
+#define SPEED_FACTOR 1
+#define SAMPLE_RATE 192000
 
 #define DEMO_SECTIONS 11 // How many sections to put in the demo
 

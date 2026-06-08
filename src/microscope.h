@@ -16,10 +16,8 @@
 
 int  microscope_init( );
 
-int microscope_grat(float* graticule);
+void microscope_do( long time, short* audioData, int count, float speed, float scale, float* graticule, float render_scale );
 
-void microscope_do( long time, short* audioData, int count, float speed, float scale );
-
-float* generateGraticule();
+float* generateGraticule(bool on);
 
 #endif

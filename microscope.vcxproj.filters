@@ -18,7 +18,22 @@
     <ClCompile Include="src\entrypoint.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\intro.c">
+    <ClCompile Include="src\system.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tinywav.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\characters.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\demo.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\microscope.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\tool.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\system.c">
@@ -48,6 +63,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\shader.inl">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\characters.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\demo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\microscope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RevisionTraced.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\tool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -125,17 +125,52 @@ DWORD WINAPI DemoThread(LPVOID parameters)
     return 0;
 }
 #endif
-bool grat = true;
+bool grat = false;
+bool invalid = false;
 //----------------------------------------------------------------------------
 #ifdef STANDALONE
 char filename[256] = ".\\audio.wav";
 char entry[256];
 #endif
+const float scales[] = {
+    1.f, 1.3f, 1.5f, 2.f, 3.f, 5.f };
+char* scaleNames[] = {
+    "Native",
+    "High",
+    "Medium",
+    "Low",
+    "iGPU",
+    "Potato"
+};
+const int nscales = 6;
 void entrypoint()
 {
     float speed = 1.0f;
-    int nSamples;
-    printf("microscope\nby DJ_Level_3/BUS ERROR Collective^Teletype Corporation\n\nPress 1 to toggle between 2x scale (default) and 1x scale.\nPress 2 to toggle graticule.\n");
+    int rscale = 1;
+    long long nSamples;
+    printf("microscope\nby DJ_Level_3/BUS ERROR Collective^Teletype Corporation\n\n");
+    printf("           _\n");
+    printf(" _ __ ___ (_) ___ _ __ ___  ___  ___ ___  _ __   ___\n");
+    printf("| '_ ` _ \\| |/ __| '__/ _ \\/ __|/ __/ _ \\| '_ \\ / _ \\\n");
+    printf("| | | | | | | (__| | | (_) \\__ \\ (_| (_) | |_) |  __/ \n");
+    printf("|_| |_| |_|_|\\___|_|  \\___/|___/\\___\\___/| .__/ \\___|\n");
+#ifdef STANDALONE
+    printf("                by DJ_Level_3/BEC^TTC    |_|  v1.0.0\n\n");
+#else
+    printf("                by DJ_Level_3/BEC^TTC    |_| v1.0.0-R\n\n");
+#endif
+    printf("Press 1 to toggle between 2x scale (default) and 1x scale.\n");
+    printf("Press 2 to toggle graticule.\n");
+    printf("Press 3 to cycle through performance modes.\n");
+ /**
+ *                _
+ *      _ __ ___ (_) ___ _ __ ___  ___  ___ ___  _ __   ___
+ *     | '_ ` _ \| |/ __| '__/ _ \/ __|/ __/ _ \| '_ \ / _ \
+ *     | | | | | | | (__| | | (_) \__ \ (_| (_) | |_) |  __/
+ *     |_| |_| |_|_|\___|_|  \___/|___/\___\___/| .__/ \___|
+ *      + Ready?       by DJ_Level_3/BEC^TTC    |_|   v1.0.0
+ *      Standalone     by DJ_Level_3/BEC^TTC    |_|   v1.0.0
+ */
 #ifdef STANDALONE
     TinyWav audio;
     int rate;
@@ -159,17 +194,18 @@ void entrypoint()
     }
     fclose(audio.f);
 #else
-    audioData = (short*)malloc((FILE_RATE * 2 * AUDIO_SECONDS + 22) * sizeof(short));
+    audioData = (short*)malloc((FILE_RATE * 2 * AUDIO_SECONDS * 2) * sizeof(short));
     if (audioData == 0) ExitProcess(-420);
     memcl(audioData, 0, FILE_RATE * AUDIO_SECONDS * 2 + 44);
     memmv(audioData, dotWavHeader, 44);
     DWORD id = 0;
     HANDLE hDemo = CreateThread(NULL, 0, DemoThread, NULL, 0, &id);
     if (!hDemo) ExitProcess(-123);
-    printf("\nBuffering while demo does initial calculations...\n");
+    printf("\nBuffering while demo does initial calculations...\n\n");
     Sleep(1000);
     printf("Starting microscope!\n");
-    nSamples = FILE_RATE * 2 * AUDIO_SECONDS;
+    printf("Performance mode %d - %s (%3.1fx scaling)\n", rscale, scaleNames[rscale], scales[rscale]);
+    nSamples = FILE_RATE * AUDIO_SECONDS;
 #endif
 
     audioCounterMax = nSamples;
@@ -179,13 +215,20 @@ void entrypoint()
     ShowCursor(0);
 
     // create window
-    //HWND hWnd = CreateWindow( "static",0,WS_POPUP|WS_VISIBLE,0,0,XRES,YRES,0,0,0,0);
-    HWND hWnd = CreateWindow((LPCSTR)0xC018, 0, WS_VISIBLE, 0, 0, XRES, YRES, 0, 0, 0, 0);
+    HWND hWnd = CreateWindow((LPCSTR)0xC018, 0, WS_VISIBLE, 0, 0, 540, 540, 0, 0, 0, 0);
+    DWORD dwStyle = GetWindowLongPtr(hWnd, GWL_STYLE);
+    DWORD dwExStyle = GetWindowLongPtr(hWnd, GWL_EXSTYLE);
+    HMENU menu = GetMenu(hWnd);
+    RECT rc = { 0,0,XRES, YRES };
+    AdjustWindowRectEx(&rc, dwStyle, menu ? TRUE : FALSE, dwExStyle);
+    SetWindowPos(hWnd, NULL, 0, 0, rc.right - rc.left, rc.bottom - rc.top, SWP_NOZORDER | SWP_NOMOVE);
+
     if (!hWnd) return;
     hDC = GetDC(hWnd);
     // initalize opengl
     if (!SetPixelFormat(hDC, ChoosePixelFormat(hDC, &pfd), &pfd)) return;
     wglMakeCurrent(hDC, wglCreateContext(hDC));
+    ((BOOL(WINAPI*)(int))wglGetProcAddress("wglSwapIntervalEXT"))(1);
 
 #ifdef _DEBUG
     for (int i = 0; i < 8; i++)
@@ -213,12 +256,6 @@ void entrypoint()
 
     // init intro
     if (!microscope_init()) return;
-    if (!microscope_grat(graticule)) {
-        free(audioData);
-        free(graticule);
-        free(otherGraticule);
-        ExitProcess(17);
-    }
 
     WAVEFORMATEX format;
     format.wFormatTag = WAVE_FORMAT_PCM,
@@ -247,10 +284,14 @@ void entrypoint()
         header[i].dwBufferLength = CHUNK_SIZE * 2 * 2;
         if (waveOutPrepareHeader(wave_out, &header[i], sizeof(header[i])) != MMSYSERR_NOERROR) {
             free(audioData);
+            free(graticule);
+            free(otherGraticule);
             ExitProcess(-2);
         }
         if (waveOutWrite(wave_out, &header[i], sizeof(header[i])) != MMSYSERR_NOERROR) {
             free(audioData);
+            free(graticule);
+            free(otherGraticule);
             ExitProcess(-3);
         }
     }
@@ -276,15 +317,23 @@ void entrypoint()
 
         if (GetAsyncKeyState('2')) {
             if (released[1]) {
-                microscope_grat(grat ? otherGraticule : graticule);
                 grat = !grat;
             }
             released[1] = false;
         }
         else released[1] = true;
 
+        if (GetAsyncKeyState('3')) {
+            if (released[2]) {
+                rscale = (rscale + 1) % nscales;
+                printf("Performance mode %d - %s (%3.1fx scaling)\n", rscale, scaleNames[rscale], scales[rscale]);
+            }
+            released[2] = false;
+        }
+        else released[2] = true;
+
         t = timeGetTime();
-        if (!fucked) microscope_do(t - tZero, audioData + 44, audioCounterMax, speed, scale + 1.0f);
+        if (!fucked) microscope_do(audioCounter, audioData + 44, audioCounterMax, speed, scale + 1.0f, grat ? otherGraticule : graticule, scales[rscale]);
 
         wglSwapLayerBuffers(hDC, WGL_SWAP_MAIN_PLANE);
         if (audioDone) exitCounter++;
@@ -292,28 +341,24 @@ void entrypoint()
 
     ShowCursor(1);
 
+    fucked = true;
     safe = false;
-
-    waveOutUnprepareHeader(wave_out, &header[0], sizeof(header[0]));
-    waveOutUnprepareHeader(wave_out, &header[1], sizeof(header[1]));
-    waveOutClose(wave_out);
     
     // free up audio or whatever
 #ifndef STANDALONE
     WaitForSingleObject(hDemo, INFINITE);
     CloseHandle(hDemo);
 #endif
-    Sleep(10);
-    fucked = true;
 
     free(audioData);
     free(graticule);
+    free(otherGraticule);
 
     ExitProcess(0);
 }
 
 void CALLBACK WaveOutProc(HWAVEOUT wave_out_handle, UINT message, DWORD_PTR instance, DWORD_PTR param1, DWORD_PTR param2) {
-    if (message == WOM_DONE) {
+    if (message == WOM_DONE && !invalid) {
         if (safe) {
             for (int i = 0; i < CHUNK_SIZE; ++i) {
                 // write the audio here
@@ -328,13 +373,12 @@ void CALLBACK WaveOutProc(HWAVEOUT wave_out_handle, UINT message, DWORD_PTR inst
                 else audioDone = true;
             }
         }
-        if (fucked || waveOutWrite(wave_out_handle, &header[chunk_swap], sizeof(header[chunk_swap])) != MMSYSERR_NOERROR) {
-            fucked = true;
-        }
+        waveOutWrite(wave_out_handle, &header[chunk_swap], sizeof(header[chunk_swap]));
         chunk_swap = !chunk_swap;
     }
-    if (message == WOM_CLOSE) {
-        safe = false;
+    else if (message == WOM_CLOSE) {
+        invalid = true;
         fucked = true;
+        safe = false;
     }
 }

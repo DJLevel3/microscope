@@ -9,7 +9,7 @@
 //=================================================================================================================
 
 static int   fsid;
-static int   stex[2];
+static int   stex[3];
 
 int microscope_init( )
 {
@@ -36,10 +36,11 @@ int microscope_init( )
     }
     #endif
 
-    glGenTextures(2, stex);
-    glBindTexture(GL_TEXTURE_2D, stex[1]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glGenTextures(3, stex);
+    oglActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, stex[2]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -47,40 +48,51 @@ int microscope_init( )
     glBindTexture(GL_TEXTURE_1D, stex[0]);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    return 1;
-}
-
-int microscope_grat(float* graticule) {
     oglActiveTexture(GL_TEXTURE0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 300, 300, 0, GL_RGB, GL_FLOAT, graticule);
-    oglActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, stex[1]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return 1;
 }
 
 //=================================================================================================================
 
-static float audioBuffer[2*9600];
+static float audioBuffer[2*9601];
 
-void microscope_do( long time, short* audioData, int count, float speed, float scale )
+void microscope_do( long time, short* audioData, int count, float speed, float scale, float* graticule, float render_scale)
 {
     //--- update parameters -----------------------------------------
-    float t = (speed * time * 192), dt = speed;
     int timeI;
-    memcl(audioBuffer, 0, 2 * 9600 * sizeof(float));
-    for (int i = 0; i < 9600; i++) {
-        timeI = f2i(max(0.f, (t + (i-3200) * dt)));
-        if (timeI < count) {
+    memcl(audioBuffer, 0, 2 * 9601 * sizeof(float));
+    int t = f2i(time * speed);
+    audioBuffer[1] = render_scale;
+    for (int i = 1; i < 9601; i++) {
+        timeI = (t + f2i((i-3201) * speed));
+        if (timeI < 0 || timeI >= count) {
+            audioBuffer[i * 2] = 0;
+            audioBuffer[i * 2 + 1] = 0;
+        } else {
             audioBuffer[i * 2] = 0.5f * scale * audioData[2 * timeI] / 32768;
             audioBuffer[i * 2 + 1] = 0.5f * scale * audioData[2 * timeI + 1] / 32768;
         }
-        else {
-            break;
-        }
     }
+    
+    oglActiveTexture(GL_TEXTURE0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 300, 300, 0, GL_RGB, GL_FLOAT, graticule);
 
-    //--- render -----------------------------------------
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, 9600, 0, GL_RG, GL_FLOAT, audioBuffer);
+    oglActiveTexture(GL_TEXTURE1);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, 9601, 0, GL_RG, GL_FLOAT, audioBuffer);
+    glRectf(-1.f/ render_scale, -1.f/ render_scale, 1.f/ render_scale, 1.f/ render_scale);
 
-    glRects( -1, -1, 1, 1 );
+    audioBuffer[0] = 1.f;
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RG32F, 1, 0, GL_RG, GL_FLOAT, audioBuffer);
+
+    oglActiveTexture(GL_TEXTURE2);
+    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 0, 0, XRES, YRES, 0);
+    glRects(-1, -1, 1, 1);
 }
 
 // make sure to free the returned array!
