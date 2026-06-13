@@ -36,10 +36,10 @@
     <ClCompile Include="src\tool.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\system.c">
+    <ClCompile Include="src\entrypoint_video.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\tinywav.c">
+    <ClCompile Include="src\ffmpeg_encode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,9 +51,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\glext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\intro.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\system.h">
@@ -78,6 +75,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\tool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ffmpeg_encode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

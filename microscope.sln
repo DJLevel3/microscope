@@ -8,6 +8,7 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
+		ReadyAVI|x86 = ReadyAVI|x86
 		ReadyDebug|x86 = ReadyDebug|x86
 		ReadyRelease|x86 = ReadyRelease|x86
 		ReadyUncompressed|x86 = ReadyUncompressed|x86
@@ -17,6 +18,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.Debug|x86.ActiveCfg = Debug|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.Debug|x86.Build.0 = Debug|Win32
+		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyAVI|x86.ActiveCfg = ReadyAVI|Win32
+		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyAVI|x86.Build.0 = ReadyAVI|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyDebug|x86.ActiveCfg = ReadyDebug|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyDebug|x86.Build.0 = ReadyDebug|Win32
 		{32D72B37-E1DB-FCED-456D-A4DED23ED821}.ReadyRelease|x86.ActiveCfg = ReadyRelease|Win32
